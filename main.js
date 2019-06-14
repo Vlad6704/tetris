@@ -94,8 +94,8 @@ tetris.addRandFigure = function (posX,posY) {
     let rand_numb = Math.round(Math.random() * (7 - 1) + 1);
     let new_length = 0;
     if (rand_numb == 1) new_length = tetris.addComponent('I', posX, posY);
-    if (rand_numb == 2) new_length = tetris.addComponent('J', posX, posY);
-    if (rand_numb == 3) new_length = tetris.addComponent('O', posX, posY);
+    if (rand_numb == 2) new_length = tetris.addComponent('O', posX, posY);
+    if (rand_numb == 3) new_length = tetris.addComponent('J', posX, posY);
     if (rand_numb == 4) new_length = tetris.addComponent('L', posX, posY);
     if (rand_numb == 5) new_length = tetris.addComponent('T', posX, posY);
     if (rand_numb == 6) new_length = tetris.addComponent('S', posX, posY);
@@ -133,7 +133,99 @@ tetris.draw_grid = function (rows, columns) {
     }
 }
 
+tetris.DeleteFullLineAndShiftAboveFigure = function () {
+    let arrPos = [];
+    tetris.component.forEach(function (figure) {
+        figure.slug.forEach(function (box) {
+            if (box.posY < 50) {
+                if (arrPos[box.posY] === undefined) arrPos[box.posY] = [];
+                arrPos[box.posY].push(box);
+            }
+        });
+    });
+    arrPos.forEach(function (item,i) {
+        if (item.length == 11) {
+            tetris.deleteRow(item);
+            tetris.muveAllDown(1, i);
+            
+        }
 
+    });
+    console.log(arrPos);
+}
+
+tetris.muveAllDown = function (distance, start_pos) {
+    tetris.component.forEach(function (figure) {
+        figure.slug.forEach(function (box) {
+            if (box.posY < start_pos) {
+                box.setPosY(box.posY + 1);
+
+            }
+        });
+    });
+}
+
+tetris.deleteRow = function (arr_box) {
+    arr_box.forEach(function (box) {
+        box.div.classList.add("delate_row");
+        box.posY = 100;
+    });
+
+/*    tetris.component.forEach(function (figure) {
+        figure.slug.forEach(function (box, i) {
+            arr_box.forEach(function (box_from_arr_box) {
+                if (box === box_from_arr_box) {
+                    figure.slug.splice(i, i);
+                }
+            });
+        });
+    });*/
+
+
+
+
+
+
+
+
+
+
+
+
+/*    tetris.component.forEach(function (figure) {
+        figure.slug.forEach(function (box, i) {
+            if (box.posY == number_row) {
+                box.div.classList.add("delate_row");
+                //box.div.remove();
+                //figure.slug.splice(i,i);
+                console.log(111);
+            }
+            
+        });
+    });*/
+/*    for (let i = tetris.component.length - 1; i >= 0; i--) {
+
+        for (let ii = tetris.component[i].slug.length - 1; ii >= 0; ii--) {
+            if (tetris.component[i].slug[ii].posY == number_row) {
+                tetris.component[i].slug[ii].div.classList.add("delate_row");
+                //box.div.remove();
+                //figure.slug.splice(i,i);
+                console.log(111);
+            }
+        }
+
+    }
+    tetris.component.forEach(function (figure) {
+        figure.slug.forEach(function (box, i) {
+            if (box.posY == number_row) {
+                console.log(222);
+                figure.slug.splice(i,i);
+            }
+
+        });
+    });*/
+
+}
 
 function Box(color, posX, posY, main_object, parent_querySelector) {
     
@@ -221,10 +313,10 @@ Figure.prototype.muveDown = function () {
             this.setPosForSlug(ShiftPos);
         } 
          else if (cross == 'bottom') {
-            this.freeze();
+            this.cantMuveDown();
         }
     }
-    else this.freeze();
+    else this.cantMuveDown();
 }
 
 Figure.prototype.muveRight = function () {
@@ -285,16 +377,22 @@ Figure.prototype.rotate = function () {
             }
         }
         else if (cross == 'bottom') {
-            this.freeze();
+            this.cantMuveDown();
         }
     }
 
 
 }
 
+Figure.prototype.cantMuveDown = function () {
+    this.freeze();
+    tetris.DeleteFullLineAndShiftAboveFigure();
+    tetris.addRandFigure(4, 0);
+} 
+
 Figure.prototype.freeze = function () {
     this.frozen = true;
-    tetris.addRandFigure(4,0);
+    
 }
 
 Figure.prototype.getArrObjPosAcordingMap = function (number_map) {

@@ -4,7 +4,7 @@ body{
 
 
 .container{
-    background-color: #ccdeff;  
+    background-color: #e0ebff;  
     height: 100%;
     width: 100%; 
     max-height: 703px;
@@ -30,5 +30,11 @@ body{
         height: calc(100% / 19);
         box-shadow: inset 0px 0px 2px 1px rgba(0, 0, 0, 0.15);
         border-radius: 2px;
+        &.delate_row{
+            background-color: #000 !important; 
+            display: none;  
+            // transition:0.5s;
+            // transform: scale(0);
+        }
     }
 }

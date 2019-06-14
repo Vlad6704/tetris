@@ -3,7 +3,7 @@ body {
 }
 
 .container {
-  background-color: #ccdeff;
+  background-color: #e0ebff;
   height: 100%;
   width: 100%;
   max-height: 703px;
@@ -34,5 +34,10 @@ body {
   -webkit-box-shadow: inset 0px 0px 2px 1px rgba(0, 0, 0, 0.15);
           box-shadow: inset 0px 0px 2px 1px rgba(0, 0, 0, 0.15);
   border-radius: 2px;
+}
+
+.container .box.delate_row {
+  background-color: #000 !important;
+  display: none;
 }
 /*# sourceMappingURL=style.css.map */
