@@ -11,24 +11,46 @@ tetris.size = {
     rows: 19,
     columns : 11
 }
+tetris.row_cost_point = 100;
+tetris.row_cost_next_level_points = 400;
+tetris.change_delay_in_next_lev = 50;
+tetris.minDelay = 150;
+tetris.level = 1;
+tetris.points = 0;
+tetris.create_pos = {
+    x: 4,
+    y: 0,
+}
+
+tetris.delay_row_move_down = 300;
+tetris.delay_figure_move_down = 1000;
+tetris.move_down_timeInterval;
 tetris.color = {
     diapazon: {
         r: {
-            max: 255,
+            max: 210,
             min: 100,
         },
         g: {
-            max: 255,
+            max: 210,
             min: 100,
         },
         b: {
-            max: 255,
+            max: 210,
             min: 100,
         }
     }
 };
+tetris.points_div = document.querySelector(".points");
+tetris.level_div = document.querySelector(".level");
 
+tetris.show_points = function () {
+    this.points_div.innerHTML = `Points: ${tetris.points}`;
+}
 
+tetris.show_level = function () {
+    this.level_div.innerHTML = `Level: ${tetris.level} (speed: ${tetris.delay_figure_move_down}ms);`
+}
 
 tetris.getColor = function () {
     function getRandomColor(objectColor) {
@@ -40,26 +62,49 @@ tetris.getColor = function () {
 
 tetris.addComponent = function (nameComponent, posX, posY) {
     if (nameComponent == 'O') {
-        return new_length = tetris.component.push(new Figure_box(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_box.size)) return new_length = tetris.component.push(new Figure_box(posX, posY, this.getColor()));
+        else tetris.game_over();
+
     }
     if (nameComponent == 'I') {
-        return new_length = tetris.component.push(new Figure_I(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_I.size)) return new_length = tetris.component.push(new Figure_I(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
     if (nameComponent == 'J') {
-        return new_length = tetris.component.push(new Figure_J(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_J.size))  return new_length = tetris.component.push(new Figure_J(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
     if (nameComponent == 'L') {
-        return new_length = tetris.component.push(new Figure_L(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_L.size))  return new_length = tetris.component.push(new Figure_L(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
     if (nameComponent == 'T') {
-        return new_length = tetris.component.push(new Figure_T(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_T.size)) return new_length = tetris.component.push(new Figure_T(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
     if (nameComponent == 'S') {
-        return new_length = tetris.component.push(new Figure_S(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_S.size)) return new_length = tetris.component.push(new Figure_S(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
     if (nameComponent == 'Z') {
-        return new_length = tetris.component.push(new Figure_Z(posX, posY, this.getColor()));
+        if (tetris.canCreateNewFigure(Figure_Z.size)) return new_length = tetris.component.push(new Figure_Z(posX, posY, this.getColor()));
+        else tetris.game_over();
     }
+}
+
+tetris.canCreateNewFigure = function (size) {
+    let ArrObjPosXPosY = [];
+    for (let i = 0; i < size; i++) {
+        ArrObjPosXPosY[i] = { posX: tetris.create_pos.x, posY: i };
+    }
+    
+    return tetris.isFreeSpace(ArrObjPosXPosY);
+
+}
+
+tetris.game_over = function () {
+    console.log("game_over");
+    clearTimeout(tetris.move_down_timeInterval);
 }
 
 tetris.isFreeSpace = function (ArrObjPosXPosY) {
@@ -78,12 +123,13 @@ tetris.isFreeSpace = function (ArrObjPosXPosY) {
 }
 
 tetris.start = function () {
-    this.addRandFigure(4, 0);
+    this.addRandFigure(tetris.create_pos.x, tetris.create_pos.y);
     this.addEventListener();
-    var timerId = setInterval(function () {
+    tetris.move_down_timeInterval = setInterval(function () {
         tetris.component[tetris.numbCurrentFigure].muveDown();
-    }, 1000);
-    
+    }, tetris.delay_figure_move_down);
+    tetris.show_points();
+    tetris.show_level();
 }
 
 tetris.setNumbCurrentFigure = function (numbCurrentFigure) {
@@ -134,6 +180,64 @@ tetris.draw_grid = function (rows, columns) {
 }
 
 tetris.DeleteFullLineAndShiftAboveFigure = function () {
+    
+    this.doIfFullRow(this.getArrRows(), 18,0,1);
+}
+
+tetris.changePointsAndShowP = function (multiplier) {
+    tetris.points += tetris.row_cost_point * multiplier;
+    tetris.show_points();
+}
+
+tetris.changeLevelAndShowL = function () {
+    if (tetris.points > 0 && tetris.points % tetris.row_cost_next_level_points == 0) {
+        tetris.level += 1;
+        tetris.setNextFigureDelay();
+        tetris.show_level();
+
+
+        clearTimeout(tetris.move_down_timeInterval);
+        tetris.move_down_timeInterval = setInterval(function () {
+            tetris.component[tetris.numbCurrentFigure].muveDown();
+        }, tetris.delay_figure_move_down);
+
+
+    }
+}
+
+tetris.setNextFigureDelay = function () {
+    if (tetris.delay_figure_move_down > tetris.minDelay) tetris.delay_figure_move_down -= tetris.change_delay_in_next_lev;
+}
+
+tetris.doIfFullRow = function (ArrRows, current_row, shift, multiplier) {
+            
+
+    if (ArrRows[current_row] !== undefined && ArrRows[current_row].length == 11) {
+        
+        tetris.deleteRow(ArrRows[current_row]);
+        tetris.changePointsAndShowP(multiplier);
+        tetris.changeLevelAndShowL();
+
+
+
+            function func() {
+                
+                tetris.muveRowsAbove(1, current_row + shift);
+                shift++;
+                if (current_row > 0) tetris.doIfFullRow(ArrRows, current_row - 1, shift, multiplier + 0.5);
+               
+            }
+
+            setTimeout(func, tetris.delay_row_move_down);
+        
+    } else {
+        if (current_row > 0) tetris.doIfFullRow(ArrRows, current_row - 1, shift, multiplier);
+        
+    }
+}
+
+
+tetris.getArrRows = function () {
     let arrPos = [];
     tetris.component.forEach(function (figure) {
         figure.slug.forEach(function (box) {
@@ -143,18 +247,31 @@ tetris.DeleteFullLineAndShiftAboveFigure = function () {
             }
         });
     });
-    arrPos.forEach(function (item,i) {
+    //console.log(arrPos);
+    return arrPos;
+/*    arrPos.forEach(function (item, i) {
         if (item.length == 11) {
-            tetris.deleteRow(item);
-            tetris.muveAllDown(1, i);
+            while (can_go == true) {
+                
+            }
             
+            function func() {
+                console.log(123);
+            }
+
+            setTimeout(func, 2000);
+            callback_row(1,i);
         }
 
-    });
-    console.log(arrPos);
+    });*/
+
+/*    if(arrPos[current_el].length == 11){
+        callback_item(item);
+    }*/
+    //
 }
 
-tetris.muveAllDown = function (distance, start_pos) {
+tetris.muveRowsAbove = function (distance, start_pos) {
     tetris.component.forEach(function (figure) {
         figure.slug.forEach(function (box) {
             if (box.posY < start_pos) {
@@ -166,6 +283,7 @@ tetris.muveAllDown = function (distance, start_pos) {
 }
 
 tetris.deleteRow = function (arr_box) {
+
     arr_box.forEach(function (box) {
         box.div.classList.add("delate_row");
         box.posY = 100;
@@ -296,6 +414,7 @@ function Figure(posX, posY, color) {
 
 Figure.id = 0;
 
+
 Figure.prototype.setPosForSlug = function (arrObjNewPosXPoxY) {
     this.slug.forEach(function (slug_item, item) {
         slug_item.setPosX(arrObjNewPosXPoxY[item].posX);
@@ -388,6 +507,7 @@ Figure.prototype.cantMuveDown = function () {
     this.freeze();
     tetris.DeleteFullLineAndShiftAboveFigure();
     tetris.addRandFigure(4, 0);
+    
 } 
 
 Figure.prototype.freeze = function () {
@@ -458,7 +578,7 @@ function Figure_box(posX, posY, color) {
 
 
 }
-
+Figure_box.size = 2;
 Figure_box.prototype = Object.create(Figure.prototype);
 Figure_box.prototype.constructor = Figure_box;
 
@@ -484,6 +604,7 @@ function Figure_I(posX, posY, color) {
 
 }
 
+Figure_I.size = 4;
 Figure_I.prototype = Object.create(Figure.prototype);
 Figure_I.prototype.constructor = Figure_I;
 
@@ -521,6 +642,7 @@ function Figure_J(posX, posY, color) {
     ];
 }
 
+Figure_J.size = 3;
 Figure_J.prototype = Object.create(Figure.prototype);
 Figure_J.prototype.constructor = Figure_J;
 
@@ -561,6 +683,7 @@ function Figure_L(posX, posY, color) {
     ];
 }
 
+Figure_L.size = 3;
 Figure_L.prototype = Object.create(Figure.prototype);
 Figure_L.prototype.constructor = Figure_L;
 
@@ -601,6 +724,7 @@ function Figure_T(posX, posY, color) {
     ];
 }
 
+Figure_T.size = 3;
 Figure_T.prototype = Object.create(Figure.prototype);
 Figure_T.prototype.constructor = Figure_T;
 
@@ -628,6 +752,7 @@ function Figure_S(posX, posY, color) {
 
 }
 
+Figure_S.size = 2;
 Figure_S.prototype = Object.create(Figure.prototype);
 Figure_S.prototype.constructor = Figure_S;
 
@@ -656,5 +781,7 @@ function Figure_Z(posX, posY, color) {
 
 }
 
+Figure_Z.size = 2;
 Figure_Z.prototype = Object.create(Figure.prototype);
 Figure_Z.prototype.constructor = Figure_Z;
+

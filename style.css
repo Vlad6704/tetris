@@ -3,7 +3,8 @@ body {
 }
 
 .container {
-  background-color: #e0ebff;
+  border: 1px solid #808080;
+  background-color: #fff;
   height: 100%;
   width: 100%;
   max-height: 703px;
@@ -37,7 +38,11 @@ body {
 }
 
 .container .box.delate_row {
-  background-color: #000 !important;
-  display: none;
+  -webkit-transition: -webkit-transform 0.2s;
+  transition: -webkit-transform 0.2s;
+  transition: transform 0.2s;
+  transition: transform 0.2s, -webkit-transform 0.2s;
+  -webkit-transform: scale(0);
+          transform: scale(0);
 }
 /*# sourceMappingURL=style.css.map */
